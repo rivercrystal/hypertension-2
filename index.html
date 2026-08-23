@@ -1111,7 +1111,15 @@
 
     <div class="news-grid" id="news-grid">
       <div class="news-card" onclick="toggleNewsDetail(0)" style="cursor:pointer">
-        <div class="news-thumb">🍽️</div>
+        <div class="news-thumb"><svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <rect x="14" y="18" width="20" height="24" rx="4" fill="#e8f4f8" stroke="#2c7da0" stroke-width="2"/>
+  <rect x="17" y="12" width="14" height="8" rx="3" fill="#2c7da0"/>
+  <circle cx="21" cy="28" r="2" fill="#2c7da0"/>
+  <circle cx="27" cy="28" r="2" fill="#2c7da0"/>
+  <circle cx="21" cy="35" r="2" fill="#2c7da0"/>
+  <circle cx="27" cy="35" r="2" fill="#2c7da0"/>
+  <rect x="20" y="8" width="8" height="5" rx="2" fill="#5aa9c8"/>
+</svg></div>
         <div class="news-body">
           <span class="news-tag">식이요법</span>
           <div class="news-title">소금을 줄이면 혈압이 낮아진다</div>
@@ -1242,7 +1250,10 @@
    DATA STORE (localStorage)
 ----------------------------------- */
 // : localStorage +  --
-let _mem = { bp: [], qa: [], evalList: [] };
+let _mem = { bp: [], qa: [
+  { id: 'sample-1', sample: true, name: '홍길동', content: '혈압약을 매일 먹어야 하나요? 혈압이 정상이면 끊어도 될까요?', date: '2026.06.10', answer: '혈압약은 혈압이 정상으로 보이더라도 약의 효과로 유지되는 것일 수 있습니다. 임의로 중단하면 혈압이 다시 오를 수 있으니, 반드시 담당 의사와 상담 후 결정하세요.' },
+  { id: 'sample-2', sample: true, name: '김영희', content: '고혈압 환자는 어떤 운동이 좋나요?', date: '2026.06.12', answer: '빠르게 걷기, 자전거 타기, 수영 같은 유산소 운동이 좋습니다. 주 5회 이상, 하루 30분을 목표로 하세요. 무거운 무게를 드는 근력운동은 혈압을 급격히 올릴 수 있어 주의가 필요합니다.' }
+], evalList: [] };
 
 function _lsGet(key, def) {
   try { return JSON.parse(localStorage.getItem(key) || 'null') || def; }
@@ -1844,7 +1855,7 @@ function submitEval() {
 ----------------------------------- */
 const newsData = [
   {
-    emoji: '🍽️',
+    emoji: '🫙',
     tag: '식이요법',
     title: '소금을 줄이면 혈압이 낮아진다',
     content: '나트륨을 하루 2g(소금 5g) 이하로 줄이면 수축기 혈압이 평균 5mmHg 낮아질 수 있습니다. 국, 찌개, 라면, 가공식품의 나트륨 함량을 확인하는 습관을 가지세요. 저염 간장, 허브, 레몬즙을 활용하면 짠맛을 줄이는 데 도움이 됩니다.'
