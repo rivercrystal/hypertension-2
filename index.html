@@ -1671,277 +1671,68 @@ function exportCSV() {
    Q&A
 ----------------------------------- */
 async function submitQA() {
-  const name = document.getElementById('qa-name').value.trim() || '익명';
-  const question = document.getElementById('qa-content').value.trim();
+  var name = document.getElementById('qa-name').value.trim() || '익명';
+  var question = document.getElementById('qa-content').value.trim();
   if (!question) { toast('질문 내용을 입력해주세요'); return; }
 
-  const qid = Date.now();
-  const newQ = { id: qid, name: name, content: question, date: new Date().toLocaleDateString('ko-KR'), answer: null };
+  var qid = Date.now();
+  var newQ = { id: qid, name: name, content: question, date: new Date().toLocaleDateString('ko-KR'), answer: null };
 
+  // 1. 즉시 화면에 추가
+  _mem.qa.unshift(newQ);
+  renderQA();
   document.getElementById('qa-name').value = '';
   document.getElementById('qa-content').value = '';
-  toast('✅ 질문이 등록되었습니다. 답변을 준비 중입니다...');
+  toast('✅ 질문 등록 중...');
 
-  // Firebase에 저장
+  // 2. Firebase에 저장
+  var fbKey = null;
   try {
-    var pushRes = await fbPush('/qa', newQ);
-    var pushData = await pushRes.json();
-    newQ.fbKey = pushData.name;
-  } catch(e) {}
-
-  // Firebase에서 전체 다시 불러오기 (새 질문 포함)
-  await loadQAFromFirebase();
-
-  // 3. GPT 답변 생성
-  var PROXY = 'https://hbp-proxy.sujung1421.workers.dev/';
-  var SYS = '당신은 국민건강보험공단 고혈압 건강교실의 건강 상담 전문가입니다. 고혈압, 혈압 관리, 약 복용, 식이요법, 운동, 생활습관 등에 대해 친절하고 정확하게 답변하세요. 답변은 간결하게 작성하고, 전문 의료 상담이 필요한 경우 반드시 담당 의사와 상담을 권유하세요. 한국어로 답변하세요.';
-  var answerText = null;
-  try {
-    var res = await fetch(PROXY, {
+    var r = await fetch('https://hbp-class-fbb37-default-rtdb.firebaseio.com/qa.json', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(newQ)
+    });
+    var d = await r.json();
+    fbKey = d.name;
+    newQ.fbKey = fbKey;
+    toast('✅ 질문이 등록되었습니다!');
+  } catch(e) {
+    console.error('Firebase push error:', e);
+    toast('✅ 질문이 등록되었습니다!');
+  }
+
+  // 3. GPT 답변
+  try {
+    var res = await fetch('https://hbp-proxy.sujung1421.workers.dev/', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
         model: 'gpt-4o-mini',
-        messages: [{ role: 'system', content: SYS }, { role: 'user', content: question }],
+        messages: [
+          {role: 'system', content: '당신은 국민건강보험공단 고혈압 건강교실의 건강 상담 전문가입니다. 고혈압, 혈압 관리, 약 복용, 식이요법, 운동, 생활습관 등에 대해 친절하고 정확하게 답변하세요. 한국어로 답변하세요.'},
+          {role: 'user', content: question}
+        ],
         max_tokens: 500
       })
     });
     var data = await res.json();
-    if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
-      answerText = data.choices[0].message.content;
+    if (data.choices && data.choices[0] && data.choices[0].message) {
+      newQ.answer = data.choices[0].message.content;
+      // Firebase에 답변 업데이트
+      if (fbKey) {
+        fetch('https://hbp-class-fbb37-default-rtdb.firebaseio.com/qa/' + fbKey + '.json', {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(newQ)
+        }).catch(function(){});
+      }
+      renderQA();
+      toast('💬 답변이 달렸습니다!');
     }
   } catch(e) {}
-
-  // 4. 답변 저장 (Firebase + 화면)
-  var target = _mem.qa.find(function(x) { return x.id === qid; });
-  if (target && answerText) {
-    target.answer = answerText;
-    _lsSet('hbp_qa_local', _mem.qa.filter(function(x){ return !x.sample; }));
-    renderQA();
-    toast('💬 답변이 달렸습니다!');
-    if (target.fbKey) {
-      try { fbSet('/qa/' + target.fbKey, target); } catch(e) {}
-    }
-  }
 }
 
-function renderQA() {
-  const list = loadQA();
-  const container = document.getElementById('qa-list');
-  if (!container) return;
-  if (!list.length) {
-    container.innerHTML = '<div class="empty"><div class="emoji">💬</div><p>등록된 질문이 없습니다</p></div>';
-    return;
-  }
-  container.innerHTML = list.map(q => `
-    <div class="qa-item">
-      <div class="qa-q">
-        <span class="qa-q-badge">Q</span>
-        <div>
-          <div>${q.content}</div>
-          <div class="qa-date">${q.name} · ${q.date}</div>
-        </div>
-      </div>
-      ${q.answer
-        ? `<div class="qa-a"><span class="qa-a-badge">A</span><div>${q.answer}</div></div>`
-        : `<div class="qa-a"><span class="qa-a-badge">A</span><div><span class="qa-pending">📬 답변 준비 중입니다</span></div></div>`
-      }
-    </div>
-  `).join('');
-}
-
-/* -----------------------------------
-   EVALUATION
------------------------------------ */
-const satisfactionData = [
-  { area: '교육 전반', questions: [
-    '교육 전반에 대해서 만족하십니까?',
-    '소그룹 자조모임(심화교육) 참여의사가 있으십니까?',
-    '향후 공단에서 질환교육이 있으면 참여하시겠습니까?'
-  ]},
-  { area: '교육 준비', questions: [
-    '교육용 교재 준비는 잘 되어 있었습니까?',
-    '필요한 기자재 준비가 잘 되어 있었습니까?'
-  ]},
-  { area: '교육 내용', questions: [
-    '교육 내용은 적절했습니까?',
-    '참석 인원수는 적절했습니까?'
-  ]},
-  { area: '교육장 환경', questions: [
-    '교육장을 찾아오기는 쉬웠습니까?',
-    '환경은 교육받기에 적절했습니까?',
-    '편의시설이 잘 구비되어 있었습니까?',
-    '좌석 및 좌석 배치는 적절했습니까?'
-  ]},
-  { area: '강사', questions: [
-    '강사의 교육 준비는 철저했습니까?',
-    '강사의 교육진행은 원활했습니까?',
-    '강사는 이해하기 쉽게 설명했습니까?'
-  ]}
-];
-
-const likertLabels = ['매우\n그렇다','그렇다','보통','아니다','매우\n아니다'];
-let evalAnswers = {};
-
-function initEval() {
-  const container = document.getElementById('satisfaction-sections');
-  if (container.querySelector('.eval-section')) return; // already built
-  let qIndex = 0;
-  container.innerHTML = satisfactionData.map((sec, si) => `
-    <div class="eval-section">
-      <div class="eval-section-title">📌 ${sec.area}</div>
-      ${sec.questions.map((q, qi) => {
-        const key = `s${si}_${qi}`;
-        qIndex++;
-        return `
-          <div class="eval-row">
-            <div class="eval-q">${q}</div>
-            <div class="likert">
-              ${[5,4,3,2,1].map((val, li) => `
-                <label>
-                  <input type="radio" name="${key}" value="${val}" onchange="evalChange('${key}', ${val})">
-                  <div class="dot"></div>
-                  <span style="white-space:pre;text-align:center;line-height:1.3">${likertLabels[li]}</span>
-                </label>
-              `).join('')}
-            </div>
-          </div>
-        `;
-      }).join('')}
-    </div>
-  `).join('');
-}
-
-function evalChange(key, val) {
-  evalAnswers[key] = val;
-  updateProgress();
-}
-
-function updateProgress() {
-  const totalQ = satisfactionData.reduce((a,s)=>a+s.questions.length, 0);
-  const answered = Object.keys(evalAnswers).length;
-  const pct = Math.round((answered / totalQ) * 100);
-  document.getElementById('progress-bar').style.width = pct + '%';
-  document.getElementById('progress-text').textContent = `${pct}% 완료 (${answered}/${totalQ} 항목)`;
-}
-
-function toggleYN(groupId, btn, isYes) {
-  const group = document.getElementById(groupId);
-  group.querySelectorAll('.yn-btn').forEach(b => b.classList.remove('selected-yes','selected-no'));
-  btn.classList.add(isYes ? 'selected-yes' : 'selected-no');
-}
-
-function submitEval() {
-  const name = document.getElementById('ev-name').value.trim();
-  const totalQ = satisfactionData.reduce((a,s)=>a+s.questions.length, 0);
-  const answered = Object.keys(evalAnswers).length;
-  // 미응답 항목 있어도 그냥 제출
-  //   
-  const evalRecord = {
-    id: Date.now(),
-    name: name || '익명',
-    submittedAt: new Date().toLocaleString('ko-KR'),
-    answers: Object.assign({}, evalAnswers),
-    bp: document.getElementById('ev-bp').value,
-    height: document.getElementById('ev-height').value,
-    weight: document.getElementById('ev-weight').value,
-    yn1: document.querySelector('#yn1 .selected-yes') ? '예' : (document.querySelector('#yn1 .selected-no') ? '아니오' : '-'),
-    yn2: document.querySelector('#yn2 .selected-yes') ? '예' : (document.querySelector('#yn2 .selected-no') ? '아니오' : '-'),
-    opinion: document.getElementById('ev-opinion').value.trim()
-  };
-  _mem.evalList.unshift(evalRecord);
-  idbPutAll('evalList', _mem.evalList);
-  toast('✅ 평가가 제출되었습니다. 감사합니다!');
-  // reset
-  setTimeout(() => {
-    evalAnswers = {};
-    document.getElementById('satisfaction-sections').innerHTML = '';
-    document.getElementById('ev-name').value = '';
-    document.getElementById('ev-bp').value = '';
-    document.getElementById('ev-height').value = '';
-    document.getElementById('ev-weight').value = '';
-    document.getElementById('ev-opinion').value = '';
-    document.querySelectorAll('.yn-btn').forEach(b => b.classList.remove('selected-yes','selected-no'));
-    document.getElementById('progress-bar').style.width = '0%';
-    document.getElementById('progress-text').textContent = '0% 완료';
-    initEval();
-  }, 1500);
-}
-
-/* -----------------------------------
-   NEWS
------------------------------------ */
-const newsData = [
-  {
-    emoji: '🫙',
-    tag: '식이요법',
-    title: '소금을 줄이면 혈압이 낮아진다',
-    content: '나트륨을 하루 2g(소금 5g) 이하로 줄이면 수축기 혈압이 평균 5mmHg 낮아질 수 있습니다. 국, 찌개, 라면, 가공식품의 나트륨 함량을 확인하는 습관을 가지세요. 저염 간장, 허브, 레몬즙을 활용하면 짠맛을 줄이는 데 도움이 됩니다.'
-  },
-  {
-    emoji: '🚶',
-    tag: '운동',
-    title: '매일 30분 걷기로 혈압을 낮추자',
-    content: '규칙적인 유산소 운동은 수축기 혈압을 4~9mmHg 낮출 수 있습니다. 빠르게 걷기, 수영, 자전거 타기를 주 5회 이상 실천하세요. 운동 전후 혈압을 측정하고, 고혈압 2기 이상은 반드시 의사와 상담 후 운동 계획을 세우세요.'
-  },
-  {
-    emoji: '💊',
-    tag: '약물',
-    title: '혈압약, 꾸준히 복용하는 것이 핵심',
-    content: '혈압이 정상으로 보여도 약의 효과로 유지되는 것일 수 있습니다. 임의로 중단하면 혈압이 다시 오를 수 있으므로 반드시 담당 의사와 상담 후 결정하세요. 매일 같은 시간에 복용하는 습관이 중요합니다.'
-  },
-  {
-    emoji: '🍌',
-    tag: '영양',
-    title: '혈압에 좋은 음식 BEST 5',
-    content: '① 바나나 — 칼륨이 풍부해 나트륨 배출을 돕습니다. ② 귀리 — 베타글루칸이 혈압을 낮춥니다. ③ 비트 — 산화질소 생성을 촉진해 혈관을 확장합니다. ④ 마늘 — 알리신 성분이 혈압 조절에 효과적입니다. ⑤ 올리브유 — 불포화지방산이 혈관 건강을 돕습니다.'
-  }
-];
-
-function renderNews() {
-  // 카드가 HTML에 직접 작성되어 있으므로 JS 렌더링 불필요
-}
-
-function toggleNewsDetail(idx) {
-  var el = document.getElementById('news-detail-' + idx);
-  var arrow = document.getElementById('news-arrow-' + idx);
-  if (!el) return;
-  var isOpen = el.style.display === 'block';
-  el.style.display = isOpen ? 'none' : 'block';
-  if (arrow) arrow.innerHTML = isOpen ? '▼ 자세히 보기' : '▲ 닫기';
-}
-
-function toggleNews(idx) {
-  var el = document.getElementById('news-detail-' + idx);
-  var btn = document.getElementById('news-arrow-' + idx);
-  if (!el || !btn) return;
-  if (el.style.display === 'block') {
-    el.style.display = 'none';
-    btn.textContent = '▼ 자세히 보기';
-  } else {
-    el.style.display = 'block';
-    btn.textContent = '▲ 닫기';
-  }
-}
-
-
-/* -----------------------------------
-   TOAST
------------------------------------ */
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2600);
-}
-
-// Init - DOM 완전히 로드된 후 실행
-window.addEventListener('DOMContentLoaded', function() {
-  try { initEval(); } catch(e) {}
-  try { renderNews(); } catch(e) {}
-  try { renderQA(); } catch(e) {}
-  loadQAFromFirebase();
-  initData().catch(function(){});
-});
 
 async function autoAnswerPending(userQA) {
   var PROXY = 'https://hbp-proxy.sujung1421.workers.dev/';
@@ -1989,23 +1780,26 @@ var SAMPLES_QA = [
 ];
 
 function loadQAFromFirebase() {
-  return fbGet('/qa').then(function(data) {
-    var userQA = [];
-    if (data && typeof data === 'object') {
-      userQA = Object.keys(data).map(function(k) {
-        return Object.assign({ fbKey: k }, data[k]);
-      }).sort(function(a, b) { return b.id - a.id; });
-    }
-    _mem.qa = userQA.concat(SAMPLES_QA);
-    renderQA();
-    autoAnswerPending(userQA);
-  }).catch(function(e) {
-    console.error('Firebase load failed:', e);
-    // 실패시 샘플만 표시
-    _mem.qa = SAMPLES_QA.slice();
-    renderQA();
-  });
+  return fetch('https://hbp-class-fbb37-default-rtdb.firebaseio.com/qa.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var userQA = [];
+      if (data && typeof data === 'object') {
+        userQA = Object.keys(data).map(function(k) {
+          return Object.assign({ fbKey: k }, data[k]);
+        }).sort(function(a, b) { return b.id - a.id; });
+      }
+      _mem.qa = userQA.concat(SAMPLES_QA);
+      renderQA();
+    }).catch(function() {
+      // Firebase 실패시 기존 데이터 유지, 없으면 샘플만
+      if (!_mem.qa || _mem.qa.length === 0) {
+        _mem.qa = SAMPLES_QA.slice();
+      }
+      renderQA();
+    });
 }
+
 
 /* -----------------------------------
    ADMIN
@@ -2474,6 +2268,19 @@ function adminDeleteQA(qid) {
   renderQA();
   toast('질문이 삭제되었습니다');
 }
+
+function toast(msg) {
+  var el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.opacity = '1';
+  el.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(function() {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 2600);
+}
 </script>
+<div id="toast" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#1B2A4A;color:#fff;padding:12px 24px;border-radius:24px;font-size:14px;font-weight:600;opacity:0;transition:all .3s;z-index:9999;white-space:nowrap;pointer-events:none"></div>
 </body>
 </html>
