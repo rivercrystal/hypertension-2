@@ -1735,6 +1735,7 @@ async function submitQA() {
 function renderQA() {
   const list = loadQA();
   const container = document.getElementById('qa-list');
+  if (!container) return;
   if (!list.length) {
     container.innerHTML = '<div class="empty"><div class="emoji">💬</div><p>등록된 질문이 없습니다</p></div>';
     return;
@@ -1939,19 +1940,15 @@ function toast(msg) {
   setTimeout(() => el.classList.remove('show'), 2600);
 }
 
-// Init
-try { initEval(); } catch(e) {}
-try { renderNews(); } catch(e) {}
-
-// 샘플 질문 즉시 표시
-try { renderQA(); } catch(e) {}
-
-// QA Firebase 로드 (완료되면 샘플+실제 질문 함께 표시)
-loadQAFromFirebase();
-setInterval(function() { loadQAFromFirebase(); }, 30000);
-
-// 나머지 Firebase 데이터
-initData().catch(function(){});
+// Init - DOM 완전히 로드된 후 실행
+window.addEventListener('DOMContentLoaded', function() {
+  try { initEval(); } catch(e) {}
+  try { renderNews(); } catch(e) {}
+  try { renderQA(); } catch(e) {}
+  loadQAFromFirebase();
+  setInterval(function() { loadQAFromFirebase(); }, 30000);
+  initData().catch(function(){});
+});
 
 async function autoAnswerPending(userQA) {
   var PROXY = 'https://hbp-proxy.sujung1421.workers.dev/';
@@ -2007,12 +2004,11 @@ function loadQAFromFirebase() {
       }).sort(function(a, b) { return b.id - a.id; });
     }
     _mem.qa = userQA.concat(SAMPLES);
-    // localStorage 동기화
     _lsSet('hbp_qa_local', userQA);
+    console.log('Firebase QA loaded:', userQA.length, '개');
     renderQA();
     var loadingEl = document.getElementById('qa-loading');
     if (loadingEl) loadingEl.remove();
-    // 미답변 질문 자동 GPT 답변
     if (userQA.length > 0) autoAnswerPending(userQA);
   }).catch(function(e) {
     // Firebase 실패시 localStorage에서 불러오기
@@ -2022,7 +2018,7 @@ function loadQAFromFirebase() {
     ];
     var localQA = _lsGet('hbp_qa_local', []);
     _mem.qa = localQA.concat(SAMPLES);
-    renderQA();
+    setTimeout(function() { renderQA(); }, 0);
   });
 }
 
