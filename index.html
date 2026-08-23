@@ -1656,6 +1656,8 @@ async function submitQA() {
   const qid = Date.now();
   const newQ = { id: qid, name: name, content: question, date: new Date().toLocaleDateString('ko-KR'), answer: null };
   _mem.qa.unshift(newQ);
+  // localStorage에 저장 (Firebase 실패해도 유지)
+  _lsSet('hbp_qa_local', _mem.qa.filter(function(x){ return !x.sample; }));
   document.getElementById('qa-name').value = '';
   document.getElementById('qa-content').value = '';
   renderQA();
@@ -1665,7 +1667,7 @@ async function submitQA() {
   try {
     var pushRes = await fbPush('/qa', newQ);
     var pushData = await pushRes.json();
-    fbRef = pushData.name; // Firebase 키 저장
+    fbRef = pushData.name;
     newQ.fbKey = fbRef;
   } catch(e) {}
 
@@ -1982,16 +1984,19 @@ function loadQAFromFirebase() {
       }).sort(function(a, b) { return b.id - a.id; });
     }
     _mem.qa = userQA.concat(SAMPLES);
+    // localStorage 동기화
+    _lsSet('hbp_qa_local', userQA);
     renderQA();
     // 미답변 질문 자동 GPT 답변
     autoAnswerPending(userQA);
   }).catch(function(e) {
-    // Firebase 실패시 샘플만 표시
-    console.error('Firebase QA load error:', e);
-    _mem.qa = [
+    // Firebase 실패시 localStorage에서 불러오기
+    var SAMPLES = [
       { id: 'sample-1', sample: true, name: '홍길동', content: '혈압약을 매일 먹어야 하나요? 혈압이 정상이면 끊어도 될까요?', date: '2026.06.10', answer: '혈압약은 혈압이 정상으로 보이더라도 약의 효과로 유지되는 것일 수 있습니다. 임의로 중단하면 혈압이 다시 오를 수 있으니, 반드시 담당 의사와 상담 후 결정하세요.' },
       { id: 'sample-2', sample: true, name: '김영희', content: '고혈압 환자는 어떤 운동이 좋나요?', date: '2026.06.12', answer: '빠르게 걷기, 자전거 타기, 수영 같은 유산소 운동이 좋습니다. 주 5회 이상, 하루 30분을 목표로 하세요. 무거운 무게를 드는 근력운동은 혈압을 급격히 올릴 수 있어 주의가 필요합니다.' }
     ];
+    var localQA = _lsGet('hbp_qa_local', []);
+    _mem.qa = localQA.concat(SAMPLES);
     renderQA();
   });
 }
