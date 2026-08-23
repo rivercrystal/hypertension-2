@@ -1678,27 +1678,19 @@ async function submitQA() {
   const qid = Date.now();
   const newQ = { id: qid, name: name, content: question, date: new Date().toLocaleDateString('ko-KR'), answer: null };
 
-  // 1. 화면에 즉시 표시
-  _mem.qa.unshift(newQ);
-  _lsSet('hbp_qa_local', _mem.qa.filter(function(x){ return !x.sample; }));
   document.getElementById('qa-name').value = '';
   document.getElementById('qa-content').value = '';
-  renderQA();
   toast('✅ 질문이 등록되었습니다. 답변을 준비 중입니다...');
 
-  // 2. Firebase에 저장 완료까지 대기
-  var fbKey = null;
+  // Firebase에 저장
   try {
     var pushRes = await fbPush('/qa', newQ);
     var pushData = await pushRes.json();
-    fbKey = pushData.name;
-    newQ.fbKey = fbKey;
+    newQ.fbKey = pushData.name;
   } catch(e) {}
 
-  // Firebase 저장 완료 후 재로드 (이제 새 질문이 Firebase에 있으므로 안전)
-  if (fbKey) {
-    await loadQAFromFirebase();
-  }
+  // Firebase에서 전체 다시 불러오기 (새 질문 포함)
+  await loadQAFromFirebase();
 
   // 3. GPT 답변 생성
   var PROXY = 'https://hbp-proxy.sujung1421.workers.dev/';
@@ -1999,22 +1991,18 @@ var SAMPLES_QA = [
 function loadQAFromFirebase() {
   return fbGet('/qa').then(function(data) {
     var userQA = [];
-    if (data) {
+    if (data && typeof data === 'object') {
       userQA = Object.keys(data).map(function(k) {
         return Object.assign({ fbKey: k }, data[k]);
       }).sort(function(a, b) { return b.id - a.id; });
     }
-    // Firebase 데이터 + 샘플로 _mem.qa 갱신
     _mem.qa = userQA.concat(SAMPLES_QA);
-    _lsSet('hbp_qa_local', userQA);
     renderQA();
-    var loadingEl = document.getElementById('qa-loading');
-    if (loadingEl) loadingEl.remove();
     autoAnswerPending(userQA);
-  }).catch(function() {
-    // Firebase 실패시 localStorage 사용
-    var localQA = _lsGet('hbp_qa_local', []);
-    _mem.qa = localQA.concat(SAMPLES_QA);
+  }).catch(function(e) {
+    console.error('Firebase load failed:', e);
+    // 실패시 샘플만 표시
+    _mem.qa = SAMPLES_QA.slice();
     renderQA();
   });
 }
