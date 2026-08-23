@@ -680,7 +680,8 @@
           <span class="news-tag">식이요법</span>
           <div class="news-title">소금을 줄이면 혈압이 낮아진다</div>
           <div id="news-detail-0" style="display:none;font-size:14px;color:var(--gray700);line-height:1.7;margin-top:10px;border-top:1px solid #eee;padding-top:10px">나트륨을 하루 2g(소금 5g) 이하로 줄이면 수축기 혈압이 평균 5mmHg 낮아질 수 있습니다. 국, 찌개, 라면, 가공식품의 나트륨 함량을 확인하는 습관을 가지세요. 저염 간장, 허브, 레몬즙을 활용하면 짠맛을 줄이는 데 도움이 됩니다.</div>
-          <div style="font-size:13px;color:var(--gray400);margin-top:8px">▼ 자세히 보기</div>
+          <div style="font-size:12px;color:var(--gray400);margin-top:6px">출처: 대한고혈압학회 (2022)</div>
+          <div id="news-arrow-0" style="font-size:13px;color:var(--gray400);margin-top:4px">▼ 자세히 보기</div>
         </div>
       </div>
       <div class="news-card" onclick="toggleNewsDetail(1)" style="cursor:pointer">
@@ -689,7 +690,8 @@
           <span class="news-tag">운동</span>
           <div class="news-title">매일 30분 걷기로 혈압을 낮추자</div>
           <div id="news-detail-1" style="display:none;font-size:14px;color:var(--gray700);line-height:1.7;margin-top:10px;border-top:1px solid #eee;padding-top:10px">규칙적인 유산소 운동은 수축기 혈압을 4~9mmHg 낮출 수 있습니다. 빠르게 걷기, 수영, 자전거 타기를 주 5회 이상 실천하세요. 운동 전후 혈압을 측정하고, 고혈압 2기 이상은 반드시 의사와 상담 후 운동 계획을 세우세요.</div>
-          <div style="font-size:13px;color:var(--gray400);margin-top:8px">▼ 자세히 보기</div>
+          <div style="font-size:12px;color:var(--gray400);margin-top:6px">출처: 세계보건기구(WHO) 신체활동 가이드라인</div>
+          <div id="news-arrow-1" style="font-size:13px;color:var(--gray400);margin-top:4px">▼ 자세히 보기</div>
         </div>
       </div>
       <div class="news-card" onclick="toggleNewsDetail(2)" style="cursor:pointer">
@@ -698,7 +700,8 @@
           <span class="news-tag">약물</span>
           <div class="news-title">혈압약, 꾸준히 복용하는 것이 핵심</div>
           <div id="news-detail-2" style="display:none;font-size:14px;color:var(--gray700);line-height:1.7;margin-top:10px;border-top:1px solid #eee;padding-top:10px">혈압이 정상으로 보여도 약의 효과로 유지되는 것일 수 있습니다. 임의로 중단하면 혈압이 다시 오를 수 있으므로 반드시 담당 의사와 상담 후 결정하세요. 매일 같은 시간에 복용하는 습관이 중요합니다.</div>
-          <div style="font-size:13px;color:var(--gray400);margin-top:8px">▼ 자세히 보기</div>
+          <div style="font-size:12px;color:var(--gray400);margin-top:6px">출처: 대한내과학회 고혈압 진료지침 (2022)</div>
+          <div id="news-arrow-2" style="font-size:13px;color:var(--gray400);margin-top:4px">▼ 자세히 보기</div>
         </div>
       </div>
       <div class="news-card" onclick="toggleNewsDetail(3)" style="cursor:pointer">
@@ -707,7 +710,8 @@
           <span class="news-tag">영양</span>
           <div class="news-title">혈압에 좋은 음식 BEST 5</div>
           <div id="news-detail-3" style="display:none;font-size:14px;color:var(--gray700);line-height:1.7;margin-top:10px;border-top:1px solid #eee;padding-top:10px">① 바나나 — 칼륨이 풍부해 나트륨 배출을 돕습니다. ② 귀리 — 베타글루칸이 혈압을 낮춥니다. ③ 비트 — 산화질소 생성을 촉진해 혈관을 확장합니다. ④ 마늘 — 알리신 성분이 혈압 조절에 효과적입니다. ⑤ 올리브유 — 불포화지방산이 혈관 건강을 돕습니다.</div>
-          <div style="font-size:13px;color:var(--gray400);margin-top:8px">▼ 자세히 보기</div>
+          <div style="font-size:12px;color:var(--gray400);margin-top:6px">출처: 한국영양학회 식사지침</div>
+          <div id="news-arrow-3" style="font-size:13px;color:var(--gray400);margin-top:4px">▼ 자세히 보기</div>
         </div>
       </div>
     </div>
@@ -1466,8 +1470,11 @@ function renderNews() {
 
 function toggleNewsDetail(idx) {
   const el = document.getElementById('news-detail-' + idx);
+  const arrow = document.getElementById('news-arrow-' + idx);
   if (!el) return;
-  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  const isOpen = el.style.display === 'block';
+  el.style.display = isOpen ? 'none' : 'block';
+  if (arrow) arrow.textContent = isOpen ? '▼ 자세히 보기' : '▲ 닫기';
 }
 
 
@@ -1561,7 +1568,7 @@ function loadQAFromFirebase() {
 /* -----------------------------------
    ADMIN
 ----------------------------------- */
-const ADMIN_PW = '1234'; //    
+const ADMIN_PW = '0000';
 
 //    (eval )
 const adminSatisfactionData = satisfactionData;
@@ -1579,23 +1586,21 @@ function closeAdminLogin() {
   document.getElementById('admin-login-error').textContent = '';
 }
 function doAdminLogin() {
-  const pw = document.getElementById('admin-pw-input').value;
-  if (pw === ADMIN_PW) {
-    closeAdminLogin();
-    //   
-    document.getElementById('admin').style.display = 'block';
-
-    const headerH = document.querySelector('header').offsetHeight;
-    const target = document.getElementById('admin');
-    window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - headerH, behavior: 'smooth' });
-    // Firebase에서 QA 먼저 로드 후 렌더
-    loadQAFromFirebase().then(function() {
-      renderAdminAll();
-    });
-  } else {
+  var pw = document.getElementById('admin-pw-input').value;
+  if (pw !== ADMIN_PW) {
     document.getElementById('admin-login-error').textContent = '비밀번호가 올바르지 않습니다.';
     document.getElementById('admin-pw-input').value = '';
+    return;
   }
+  closeAdminLogin();
+  var adminEl = document.getElementById('admin');
+  adminEl.style.display = 'block';
+  var headerH = document.querySelector('header').offsetHeight;
+  window.scrollTo({ top: adminEl.getBoundingClientRect().top + window.scrollY - headerH, behavior: 'smooth' });
+  renderAdminAll();
+  loadQAFromFirebase().then(function() {
+    try { renderAdminQA(); } catch(e) {}
+  }).catch(function() {});
 }
 function doAdminLogout() {
   document.getElementById('admin').style.display = 'none';
@@ -1616,11 +1621,10 @@ function switchAdminTab(name) {
 
 /*  */
 function renderAdminAll() {
-  renderAdminStatCards();
-  renderAdminList();
-  renderAdminCharts();
-  // renderAdminQA는 loadQAFromFirebase.then()에서 호출됨
-  renderAdminQA();
+  try { renderAdminStatCards(); } catch(e) { console.error('StatCards:', e); }
+  try { renderAdminList(); } catch(e) { console.error('List:', e); }
+  try { renderAdminCharts(); } catch(e) { console.error('Charts:', e); }
+  try { renderAdminQA(); } catch(e) { console.error('QA:', e); }
 }
 
 /*  */
