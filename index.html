@@ -1685,7 +1685,8 @@ async function submitQA() {
   document.getElementById('qa-content').value = '';
   renderQA();
   toast('✅ 질문이 등록되었습니다. 답변을 준비 중입니다...');
-  // Firebase에 질문 저장
+  // Firebase에 질문 저장 (타이머 리셋하여 덮어쓰기 방지)
+  clearInterval(_qaRefreshTimer);
   var fbRef = null;
   try {
     var pushRes = await fbPush('/qa', newQ);
@@ -1693,6 +1694,8 @@ async function submitQA() {
     fbRef = pushData.name;
     newQ.fbKey = fbRef;
   } catch(e) {}
+  // 저장 완료 후 타이머 재시작
+  _qaRefreshTimer = setInterval(function() { loadQAFromFirebase(); }, 30000);
 
   // 2. Worker 통해 GPT 호출
   var PROXY = 'https://hbp-proxy.sujung1421.workers.dev/';
