@@ -592,6 +592,7 @@
           </div>
           <div class="qa-a"><span class="qa-a-badge">A</span><div>빠르게 걷기, 자전거 타기, 수영 같은 유산소 운동이 좋습니다. 주 5회 이상, 하루 30분을 목표로 하세요. 무거운 무게를 드는 근력운동은 혈압을 급격히 올릴 수 있어 주의가 필요합니다.</div></div>
         </div>
+        <div id="qa-loading" style="text-align:center;padding:16px;color:var(--gray400);font-size:14px">⏳ 다른 질문을 불러오는 중...</div>
       </div>
     </div>
   </div>
@@ -2009,8 +2010,10 @@ function loadQAFromFirebase() {
     // localStorage 동기화
     _lsSet('hbp_qa_local', userQA);
     renderQA();
+    var loadingEl = document.getElementById('qa-loading');
+    if (loadingEl) loadingEl.remove();
     // 미답변 질문 자동 GPT 답변
-    autoAnswerPending(userQA);
+    if (userQA.length > 0) autoAnswerPending(userQA);
   }).catch(function(e) {
     // Firebase 실패시 localStorage에서 불러오기
     var SAMPLES = [
