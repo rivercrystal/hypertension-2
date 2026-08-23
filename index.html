@@ -571,7 +571,28 @@
 
     <div class="card">
       <h3>📚 질문 목록</h3>
-      <div class="qa-list" id="qa-list"></div>
+      <div class="qa-list" id="qa-list">
+        <div class="qa-item">
+          <div class="qa-q">
+            <span class="qa-q-badge">Q</span>
+            <div>
+              <div>혈압약을 매일 먹어야 하나요? 혈압이 정상이면 끊어도 될까요?</div>
+              <div class="qa-date">홍길동 · 2026.06.10</div>
+            </div>
+          </div>
+          <div class="qa-a"><span class="qa-a-badge">A</span><div>혈압약은 혈압이 정상으로 보이더라도 약의 효과로 유지되는 것일 수 있습니다. 임의로 중단하면 혈압이 다시 오를 수 있으니, 반드시 담당 의사와 상담 후 결정하세요.</div></div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">
+            <span class="qa-q-badge">Q</span>
+            <div>
+              <div>고혈압 환자는 어떤 운동이 좋나요?</div>
+              <div class="qa-date">김영희 · 2026.06.12</div>
+            </div>
+          </div>
+          <div class="qa-a"><span class="qa-a-badge">A</span><div>빠르게 걷기, 자전거 타기, 수영 같은 유산소 운동이 좋습니다. 주 5회 이상, 하루 30분을 목표로 하세요. 무거운 무게를 드는 근력운동은 혈압을 급격히 올릴 수 있어 주의가 필요합니다.</div></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1917,18 +1938,19 @@ function toast(msg) {
   setTimeout(() => el.classList.remove('show'), 2600);
 }
 
-// Init - 핵심 UI는 즉시 실행
-try { initEval(); } catch(e) { console.error('initEval:', e); }
-try { renderNews(); } catch(e) { console.error('renderNews:', e); }
+// Init
+try { initEval(); } catch(e) {}
+try { renderNews(); } catch(e) {}
 
-// Firebase 연동 (실패해도 UI에 영향 없음)
-initData().then(function() {
-  loadQAFromFirebase();
-  setInterval(function() { loadQAFromFirebase(); }, 30000);
-}).catch(function() {
-  loadQAFromFirebase();
-  setInterval(function() { loadQAFromFirebase(); }, 30000);
-});
+// 샘플 질문 즉시 표시
+try { renderQA(); } catch(e) {}
+
+// QA Firebase 로드 (완료되면 샘플+실제 질문 함께 표시)
+loadQAFromFirebase();
+setInterval(function() { loadQAFromFirebase(); }, 30000);
+
+// 나머지 Firebase 데이터
+initData().catch(function(){});
 
 async function autoAnswerPending(userQA) {
   var PROXY = 'https://hbp-proxy.sujung1421.workers.dev/';
