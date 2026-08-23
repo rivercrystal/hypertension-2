@@ -1132,7 +1132,7 @@
     <div class="info-box">최신 고혈압 건강 정보와 생활 관리 팁을 제공합니다.</div>
 
     <div class="news-grid" id="news-grid">
-      <div class="news-card" onclick="toggleNewsDetail(0)" style="cursor:pointer">
+      <div class="news-card" style="">
         <div class="news-thumb"><svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
   <rect x="14" y="18" width="20" height="24" rx="4" fill="#e8f4f8" stroke="#2c7da0" stroke-width="2"/>
   <rect x="17" y="12" width="14" height="8" rx="3" fill="#2c7da0"/>
@@ -1145,39 +1145,35 @@
         <div class="news-body">
           <span class="news-tag">식이요법</span>
           <div class="news-title">소금을 줄이면 혈압이 낮아진다</div>
-          <div id="news-detail-0" style="display:none;font-size:14px;color:var(--gray700);line-height:1.7;margin-top:10px;border-top:1px solid #eee;padding-top:10px">나트륨을 하루 2g(소금 5g) 이하로 줄이면 수축기 혈압이 평균 5mmHg 낮아질 수 있습니다. 국, 찌개, 라면, 가공식품의 나트륨 함량을 확인하는 습관을 가지세요. 저염 간장, 허브, 레몬즙을 활용하면 짠맛을 줄이는 데 도움이 됩니다.</div>
-          <div style="font-size:12px;color:var(--gray400);margin-top:6px">출처: 대한고혈압학회 (2022)</div>
-          <div id="news-arrow-0" style="font-size:13px;color:var(--gray400);margin-top:4px">▼ 자세히 보기</div>
+          <button id="news-arrow-0" onclick="toggleNewsDetail(0)" style="background:none;border:1px solid var(--gray300);border-radius:6px;padding:4px 12px;font-size:13px;color:var(--gray500);cursor:pointer;margin-top:6px;font-family:inherit">▼ 자세히 보기</button>
+          <div id="news-detail-0" style="display:none;font-size:14px;color:var(--gray700);line-height:1.7;margin-top:10px;border-top:1px solid #eee;padding-top:10px">나트륨을 하루 2g(소금 5g) 이하로 줄이면 수축기 혈압이 평균 5mmHg 낮아질 수 있습니다. 국, 찌개, 라면, 가공식품의 나트륨 함량을 확인하는 습관을 가지세요. 저염 간장, 허브, 레몬즙을 활용하면 짠맛을 줄이는 데 도움이 됩니다.<div style="font-size:12px;color:var(--gray400);margin-top:8px">출처: 대한고혈압학회 (2022)</div><button onclick="toggleNewsDetail(0)" style="background:none;border:1px solid var(--gray300);border-radius:6px;padding:4px 12px;font-size:13px;color:var(--gray500);cursor:pointer;margin-top:8px;font-family:inherit">▲ 닫기</button></div>
         </div>
       </div>
-      <div class="news-card" onclick="toggleNewsDetail(1)" style="cursor:pointer">
+      <div class="news-card" style="">
         <div class="news-thumb">🚶</div>
         <div class="news-body">
           <span class="news-tag">운동</span>
           <div class="news-title">매일 30분 걷기로 혈압을 낮추자</div>
-          <div id="news-detail-1" style="display:none;font-size:14px;color:var(--gray700);line-height:1.7;margin-top:10px;border-top:1px solid #eee;padding-top:10px">규칙적인 유산소 운동은 수축기 혈압을 4~9mmHg 낮출 수 있습니다. 빠르게 걷기, 수영, 자전거 타기를 주 5회 이상 실천하세요. 운동 전후 혈압을 측정하고, 고혈압 2기 이상은 반드시 의사와 상담 후 운동 계획을 세우세요.</div>
-          <div style="font-size:12px;color:var(--gray400);margin-top:6px">출처: 세계보건기구(WHO) 신체활동 가이드라인</div>
-          <div id="news-arrow-1" style="font-size:13px;color:var(--gray400);margin-top:4px">▼ 자세히 보기</div>
+          <button id="news-arrow-1" onclick="toggleNewsDetail(1)" style="background:none;border:1px solid var(--gray300);border-radius:6px;padding:4px 12px;font-size:13px;color:var(--gray500);cursor:pointer;margin-top:6px;font-family:inherit">▼ 자세히 보기</button>
+          <div id="news-detail-1" style="display:none;font-size:14px;color:var(--gray700);line-height:1.7;margin-top:10px;border-top:1px solid #eee;padding-top:10px">규칙적인 유산소 운동은 수축기 혈압을 4~9mmHg 낮출 수 있습니다. 빠르게 걷기, 수영, 자전거 타기를 주 5회 이상 실천하세요. 운동 전후 혈압을 측정하고, 고혈압 2기 이상은 반드시 의사와 상담 후 운동 계획을 세우세요.<div style="font-size:12px;color:var(--gray400);margin-top:8px">출처: 세계보건기구(WHO) 신체활동 가이드라인</div><button onclick="toggleNewsDetail(1)" style="background:none;border:1px solid var(--gray300);border-radius:6px;padding:4px 12px;font-size:13px;color:var(--gray500);cursor:pointer;margin-top:8px;font-family:inherit">▲ 닫기</button></div>
         </div>
       </div>
-      <div class="news-card" onclick="toggleNewsDetail(2)" style="cursor:pointer">
+      <div class="news-card" style="">
         <div class="news-thumb">💊</div>
         <div class="news-body">
           <span class="news-tag">약물</span>
           <div class="news-title">혈압약, 꾸준히 복용하는 것이 핵심</div>
-          <div id="news-detail-2" style="display:none;font-size:14px;color:var(--gray700);line-height:1.7;margin-top:10px;border-top:1px solid #eee;padding-top:10px">혈압이 정상으로 보여도 약의 효과로 유지되는 것일 수 있습니다. 임의로 중단하면 혈압이 다시 오를 수 있으므로 반드시 담당 의사와 상담 후 결정하세요. 매일 같은 시간에 복용하는 습관이 중요합니다.</div>
-          <div style="font-size:12px;color:var(--gray400);margin-top:6px">출처: 대한내과학회 고혈압 진료지침 (2022)</div>
-          <div id="news-arrow-2" style="font-size:13px;color:var(--gray400);margin-top:4px">▼ 자세히 보기</div>
+          <button id="news-arrow-2" onclick="toggleNewsDetail(2)" style="background:none;border:1px solid var(--gray300);border-radius:6px;padding:4px 12px;font-size:13px;color:var(--gray500);cursor:pointer;margin-top:6px;font-family:inherit">▼ 자세히 보기</button>
+          <div id="news-detail-2" style="display:none;font-size:14px;color:var(--gray700);line-height:1.7;margin-top:10px;border-top:1px solid #eee;padding-top:10px">혈압이 정상으로 보여도 약의 효과로 유지되는 것일 수 있습니다. 임의로 중단하면 혈압이 다시 오를 수 있으므로 반드시 담당 의사와 상담 후 결정하세요. 매일 같은 시간에 복용하는 습관이 중요합니다.<div style="font-size:12px;color:var(--gray400);margin-top:8px">출처: 대한내과학회 고혈압 진료지침 (2022)</div><button onclick="toggleNewsDetail(2)" style="background:none;border:1px solid var(--gray300);border-radius:6px;padding:4px 12px;font-size:13px;color:var(--gray500);cursor:pointer;margin-top:8px;font-family:inherit">▲ 닫기</button></div>
         </div>
       </div>
-      <div class="news-card" onclick="toggleNewsDetail(3)" style="cursor:pointer">
+      <div class="news-card" style="">
         <div class="news-thumb">🍌</div>
         <div class="news-body">
           <span class="news-tag">영양</span>
           <div class="news-title">혈압에 좋은 음식 BEST 5</div>
-          <div id="news-detail-3" style="display:none;font-size:14px;color:var(--gray700);line-height:1.7;margin-top:10px;border-top:1px solid #eee;padding-top:10px">① 바나나 — 칼륨이 풍부해 나트륨 배출을 돕습니다. ② 귀리 — 베타글루칸이 혈압을 낮춥니다. ③ 비트 — 산화질소 생성을 촉진해 혈관을 확장합니다. ④ 마늘 — 알리신 성분이 혈압 조절에 효과적입니다. ⑤ 올리브유 — 불포화지방산이 혈관 건강을 돕습니다.</div>
-          <div style="font-size:12px;color:var(--gray400);margin-top:6px">출처: 한국영양학회 식사지침</div>
-          <div id="news-arrow-3" style="font-size:13px;color:var(--gray400);margin-top:4px">▼ 자세히 보기</div>
+          <button id="news-arrow-3" onclick="toggleNewsDetail(3)" style="background:none;border:1px solid var(--gray300);border-radius:6px;padding:4px 12px;font-size:13px;color:var(--gray500);cursor:pointer;margin-top:6px;font-family:inherit">▼ 자세히 보기</button>
+          <div id="news-detail-3" style="display:none;font-size:14px;color:var(--gray700);line-height:1.7;margin-top:10px;border-top:1px solid #eee;padding-top:10px">① 바나나 — 칼륨이 풍부해 나트륨 배출을 돕습니다. ② 귀리 — 베타글루칸이 혈압을 낮춥니다. ③ 비트 — 산화질소 생성을 촉진해 혈관을 확장합니다. ④ 마늘 — 알리신 성분이 혈압 조절에 효과적입니다. ⑤ 올리브유 — 불포화지방산이 혈관 건강을 돕습니다.<div style="font-size:12px;color:var(--gray400);margin-top:8px">출처: 한국영양학회 식사지침</div><button onclick="toggleNewsDetail(3)" style="background:none;border:1px solid var(--gray300);border-radius:6px;padding:4px 12px;font-size:13px;color:var(--gray500);cursor:pointer;margin-top:8px;font-family:inherit">▲ 닫기</button></div>
         </div>
       </div>
     </div>
@@ -1675,33 +1671,27 @@ async function submitQA() {
   const question = document.getElementById('qa-content').value.trim();
   if (!question) { toast('질문 내용을 입력해주세요'); return; }
 
-  // 1. 질문 등록 (답변 준비 중)
   const qid = Date.now();
   const newQ = { id: qid, name: name, content: question, date: new Date().toLocaleDateString('ko-KR'), answer: null };
+
+  // 1. 화면에 즉시 표시
   _mem.qa.unshift(newQ);
-  // localStorage에 저장 (Firebase 실패해도 유지)
   _lsSet('hbp_qa_local', _mem.qa.filter(function(x){ return !x.sample; }));
   document.getElementById('qa-name').value = '';
   document.getElementById('qa-content').value = '';
   renderQA();
   toast('✅ 질문이 등록되었습니다. 답변을 준비 중입니다...');
-  // Firebase에 질문 저장 (타이머 리셋하여 덮어쓰기 방지)
-  clearInterval(_qaRefreshTimer);
-  var fbRef = null;
+
+  // 2. Firebase에 저장 (재로드 없음!)
   try {
     var pushRes = await fbPush('/qa', newQ);
     var pushData = await pushRes.json();
-    fbRef = pushData.name;
-    newQ.fbKey = fbRef;
+    newQ.fbKey = pushData.name;
   } catch(e) {}
-  // Firebase 저장 완료 후 즉시 재로드해서 동기화
-  loadQAFromFirebase();
-  _qaRefreshTimer = setInterval(function() { loadQAFromFirebase(); }, 30000);
 
-  // 2. Worker 통해 GPT 호출
+  // 3. GPT 답변 생성
   var PROXY = 'https://hbp-proxy.sujung1421.workers.dev/';
   var SYS = '당신은 국민건강보험공단 고혈압 건강교실의 건강 상담 전문가입니다. 고혈압, 혈압 관리, 약 복용, 식이요법, 운동, 생활습관 등에 대해 친절하고 정확하게 답변하세요. 답변은 간결하게 작성하고, 전문 의료 상담이 필요한 경우 반드시 담당 의사와 상담을 권유하세요. 한국어로 답변하세요.';
-
   var answerText = null;
   try {
     var res = await fetch(PROXY, {
@@ -1709,10 +1699,7 @@ async function submitQA() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: SYS },
-          { role: 'user', content: question }
-        ],
+        messages: [{ role: 'system', content: SYS }, { role: 'user', content: question }],
         max_tokens: 500
       })
     });
@@ -1720,17 +1707,15 @@ async function submitQA() {
     if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
       answerText = data.choices[0].message.content;
     }
-  } catch(e) {
-    answerText = null;
-  }
+  } catch(e) {}
 
-  // 3. _mem.qa에서 직접 찾아 답변 저장
+  // 4. 답변 저장 (Firebase + 화면)
   var target = _mem.qa.find(function(x) { return x.id === qid; });
-  if (target) {
+  if (target && answerText) {
     target.answer = answerText;
+    _lsSet('hbp_qa_local', _mem.qa.filter(function(x){ return !x.sample; }));
     renderQA();
     toast('💬 답변이 달렸습니다!');
-    // Firebase에 답변 업데이트
     if (target.fbKey) {
       try { fbSet('/qa/' + target.fbKey, target); } catch(e) {}
     }
@@ -1932,7 +1917,7 @@ function toggleNewsDetail(idx) {
   if (!el) return;
   const isOpen = el.style.display === 'block';
   el.style.display = isOpen ? 'none' : 'block';
-  if (arrow) arrow.textContent = isOpen ? '▼ 자세히 보기' : '▲ 닫기';
+  if (arrow) arrow.innerHTML = isOpen ? '▼ 자세히 보기' : '▲ 닫기';
 }
 
 
@@ -1951,7 +1936,6 @@ window.addEventListener('DOMContentLoaded', function() {
   try { renderNews(); } catch(e) {}
   try { renderQA(); } catch(e) {}
   loadQAFromFirebase();
-  setInterval(function() { loadQAFromFirebase(); }, 30000);
   initData().catch(function(){});
 });
 
