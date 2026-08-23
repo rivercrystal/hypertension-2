@@ -1694,7 +1694,8 @@ async function submitQA() {
     fbRef = pushData.name;
     newQ.fbKey = fbRef;
   } catch(e) {}
-  // 저장 완료 후 타이머 재시작
+  // Firebase 저장 완료 후 즉시 재로드해서 동기화
+  loadQAFromFirebase();
   _qaRefreshTimer = setInterval(function() { loadQAFromFirebase(); }, 30000);
 
   // 2. Worker 통해 GPT 호출
@@ -1994,35 +1995,31 @@ async function autoAnswerPending(userQA) {
   renderQA();
 }
 
+var SAMPLES_QA = [
+  { id: 'sample-1', sample: true, name: '홍길동', content: '혈압약을 매일 먹어야 하나요? 혈압이 정상이면 끊어도 될까요?', date: '2026.06.10', answer: '혈압약은 혈압이 정상으로 보이더라도 약의 효과로 유지되는 것일 수 있습니다. 임의로 중단하면 혈압이 다시 오를 수 있으니, 반드시 담당 의사와 상담 후 결정하세요.' },
+  { id: 'sample-2', sample: true, name: '김영희', content: '고혈압 환자는 어떤 운동이 좋나요?', date: '2026.06.12', answer: '빠르게 걷기, 자전거 타기, 수영 같은 유산소 운동이 좋습니다. 주 5회 이상, 하루 30분을 목표로 하세요. 무거운 무게를 드는 근력운동은 혈압을 급격히 올릴 수 있어 주의가 필요합니다.' }
+];
+
 function loadQAFromFirebase() {
   return fbGet('/qa').then(function(data) {
-    var SAMPLES = [
-      { id: 'sample-1', sample: true, name: '홍길동', content: '혈압약을 매일 먹어야 하나요? 혈압이 정상이면 끊어도 될까요?', date: '2026.06.10', answer: '혈압약은 혈압이 정상으로 보이더라도 약의 효과로 유지되는 것일 수 있습니다. 임의로 중단하면 혈압이 다시 오를 수 있으니, 반드시 담당 의사와 상담 후 결정하세요.' },
-      { id: 'sample-2', sample: true, name: '김영희', content: '고혈압 환자는 어떤 운동이 좋나요?', date: '2026.06.12', answer: '빠르게 걷기, 자전거 타기, 수영 같은 유산소 운동이 좋습니다. 주 5회 이상, 하루 30분을 목표로 하세요. 무거운 무게를 드는 근력운동은 혈압을 급격히 올릴 수 있어 주의가 필요합니다.' }
-    ];
     var userQA = [];
     if (data) {
-      // Firebase 객체를 배열로 변환 후 최신순 정렬
       userQA = Object.keys(data).map(function(k) {
         return Object.assign({ fbKey: k }, data[k]);
       }).sort(function(a, b) { return b.id - a.id; });
     }
-    _mem.qa = userQA.concat(SAMPLES);
+    // Firebase 데이터 + 샘플로 _mem.qa 갱신
+    _mem.qa = userQA.concat(SAMPLES_QA);
     _lsSet('hbp_qa_local', userQA);
-    console.log('Firebase QA loaded:', userQA.length, '개');
     renderQA();
     var loadingEl = document.getElementById('qa-loading');
     if (loadingEl) loadingEl.remove();
-    if (userQA.length > 0) autoAnswerPending(userQA);
-  }).catch(function(e) {
-    // Firebase 실패시 localStorage에서 불러오기
-    var SAMPLES = [
-      { id: 'sample-1', sample: true, name: '홍길동', content: '혈압약을 매일 먹어야 하나요? 혈압이 정상이면 끊어도 될까요?', date: '2026.06.10', answer: '혈압약은 혈압이 정상으로 보이더라도 약의 효과로 유지되는 것일 수 있습니다. 임의로 중단하면 혈압이 다시 오를 수 있으니, 반드시 담당 의사와 상담 후 결정하세요.' },
-      { id: 'sample-2', sample: true, name: '김영희', content: '고혈압 환자는 어떤 운동이 좋나요?', date: '2026.06.12', answer: '빠르게 걷기, 자전거 타기, 수영 같은 유산소 운동이 좋습니다. 주 5회 이상, 하루 30분을 목표로 하세요. 무거운 무게를 드는 근력운동은 혈압을 급격히 올릴 수 있어 주의가 필요합니다.' }
-    ];
+    autoAnswerPending(userQA);
+  }).catch(function() {
+    // Firebase 실패시 localStorage 사용
     var localQA = _lsGet('hbp_qa_local', []);
-    _mem.qa = localQA.concat(SAMPLES);
-    setTimeout(function() { renderQA(); }, 0);
+    _mem.qa = localQA.concat(SAMPLES_QA);
+    renderQA();
   });
 }
 
