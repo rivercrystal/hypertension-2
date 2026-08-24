@@ -2308,6 +2308,15 @@ function toast(msg) {
     el.style.transform = 'translateX(-50%) translateY(20px)';
   }, 2600);
 }
+
+/* -----------------------------------
+   페이지 로드시 초기화
+   (initData/loadQAFromFirebase가 정의만 되어있고
+   호출되지 않아 새로고침 시 Firebase 데이터가
+   반영되지 않던 문제 수정)
+----------------------------------- */
+try { initData(); } catch(e) { console.error(e); }
+loadQAFromFirebase().catch(function(){});
 </script>
 <div id="toast" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#1B2A4A;color:#fff;padding:12px 24px;border-radius:24px;font-size:14px;font-weight:600;opacity:0;transition:all .3s;z-index:9999;white-space:nowrap;pointer-events:none"></div>
 </body>
