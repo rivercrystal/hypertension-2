@@ -1829,6 +1829,18 @@ function loadQAFromFirebase() {
 }
 
 /* -----------------------------------
+   건강정보 자세히보기 토글
+----------------------------------- */
+function toggleNews(idx) {
+  var detail = document.getElementById('news-detail-' + idx);
+  var btn = document.getElementById('news-arrow-' + idx);
+  if (!detail || !btn) return;
+  var isHidden = detail.style.display === 'none' || !detail.style.display;
+  detail.style.display = isHidden ? 'block' : 'none';
+  btn.textContent = isHidden ? '▲ 닫기' : '▼ 자세히 보기';
+}
+
+/* -----------------------------------
    평가표 (만족도 평가)
    satisfactionData/evalChange/toggleYN/initEval/submitEval이
    전부 누락되어 있어 4~5번(단골의원/약물치료) 체크뿐 아니라
