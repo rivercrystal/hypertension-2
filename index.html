@@ -1670,6 +1670,34 @@ function exportCSV() {
 /* -----------------------------------
    Q&A
 ----------------------------------- */
+function renderQA() {
+  var container = document.getElementById('qa-list');
+  if (!container) return;
+  var list = _mem.qa || [];
+
+  if (!list.length) {
+    container.innerHTML = '<div class="empty"><div class="emoji">💬</div><p>등록된 질문이 없습니다</p></div>';
+    return;
+  }
+
+  container.innerHTML = list.map(function(q) {
+    var answerHtml = q.answer
+      ? '<div class="qa-a"><span class="qa-a-badge">A</span><div>' + q.answer + '</div></div>'
+      : '<div class="qa-a" style="color:var(--gray500);font-style:italic"><span class="qa-a-badge" style="background:var(--gray300)">A</span><div>답변 준비 중입니다.</div></div>';
+
+    return '<div class="qa-item">'
+      + '<div class="qa-q">'
+      + '<span class="qa-q-badge">Q</span>'
+      + '<div>'
+      + '<div>' + q.content + '</div>'
+      + '<div class="qa-date">' + q.name + ' · ' + q.date + '</div>'
+      + '</div>'
+      + '</div>'
+      + answerHtml
+      + '</div>';
+  }).join('');
+}
+
 async function submitQA() {
   var name = document.getElementById('qa-name').value.trim() || '익명';
   var question = document.getElementById('qa-content').value.trim();
