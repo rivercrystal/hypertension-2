@@ -1828,6 +1828,113 @@ function loadQAFromFirebase() {
     });
 }
 
+/* -----------------------------------
+   평가표 (만족도 평가)
+   satisfactionData/evalChange/toggleYN/initEval/submitEval이
+   전부 누락되어 있어 4~5번(단골의원/약물치료) 체크뿐 아니라
+   평가표 전체가 동작하지 않던 문제를 복구
+----------------------------------- */
+const satisfactionData = [
+  { area: '교육 전반', questions: [
+    '교육 전반에 대해서 만족하십니까?',
+    '소그룹 자조모임(심화교육) 참여의사가 있으십니까?',
+    '향후 공단에서 질환교육이 있으면 참여하시겠습니까?'
+  ]},
+  { area: '교육 준비', questions: [
+    '교육용 교재 준비는 잘 되어 있었습니까?',
+    '필요한 기자재 준비가 잘 되어 있었습니까?'
+  ]},
+  { area: '교육 내용', questions: [
+    '교육 내용은 적절했습니까?',
+    '참석 인원수는 적절했습니까?'
+  ]},
+  { area: '교육장 환경', questions: [
+    '교육장을 찾아오기는 쉬웠습니까?',
+    '환경은 교육받기에 적절했습니까?',
+    '편의시설이 잘 구비되어 있었습니까?',
+    '좌석 및 좌석 배치는 적절했습니까?'
+  ]},
+  { area: '강사', questions: [
+    '강사의 교육 준비는 철저했습니까?',
+    '강사의 교육진행은 원활했습니까?',
+    '강사는 이해하기 쉽게 설명했습니까?'
+  ]}
+];
+
+var TOTAL_EVAL_QUESTIONS = satisfactionData.reduce(function(sum, sec) { return sum + sec.questions.length; }, 0);
+
+var evalState = { answers: {}, yn1: null, yn2: null };
+
+function evalChange(key, value) {
+  evalState.answers[key] = value;
+  updateEvalProgress();
+}
+
+function toggleYN(groupId, btnEl, isYes) {
+  var group = document.getElementById(groupId);
+  if (!group) return;
+  var buttons = group.querySelectorAll('.yn-btn');
+  buttons.forEach(function(b) { b.classList.remove('selected-yes', 'selected-no'); });
+  btnEl.classList.add(isYes ? 'selected-yes' : 'selected-no');
+  if (groupId === 'yn1') evalState.yn1 = isYes ? '예' : '아니오';
+  if (groupId === 'yn2') evalState.yn2 = isYes ? '예' : '아니오';
+}
+
+function updateEvalProgress() {
+  var answered = Object.keys(evalState.answers).length;
+  var pct = TOTAL_EVAL_QUESTIONS ? Math.round((answered / TOTAL_EVAL_QUESTIONS) * 100) : 0;
+  var bar = document.getElementById('progress-bar');
+  var text = document.getElementById('progress-text');
+  if (bar) bar.style.width = pct + '%';
+  if (text) text.textContent = pct + '% 완료';
+}
+
+function initEval() {
+  evalState = { answers: {}, yn1: null, yn2: null };
+  updateEvalProgress();
+}
+
+function submitEval() {
+  var nameEl = document.getElementById('ev-name');
+  var name = nameEl ? nameEl.value.trim() : '';
+  if (!name) { toast('이름을 입력해주세요'); return; }
+
+  var answered = Object.keys(evalState.answers).length;
+  if (answered < TOTAL_EVAL_QUESTIONS) {
+    toast('모든 문항에 답변해주세요 (' + answered + '/' + TOTAL_EVAL_QUESTIONS + ')');
+    return;
+  }
+
+  var record = {
+    id: Date.now(),
+    name: name,
+    submittedAt: new Date().toLocaleString('ko-KR'),
+    bp: (document.getElementById('ev-bp') || {}).value ? document.getElementById('ev-bp').value.trim() : '',
+    bpDate: (document.getElementById('ev-bp-date') || {}).value || '',
+    height: (document.getElementById('ev-height') || {}).value ? document.getElementById('ev-height').value.trim() : '',
+    weight: (document.getElementById('ev-weight') || {}).value ? document.getElementById('ev-weight').value.trim() : '',
+    yn1: evalState.yn1,
+    yn2: evalState.yn2,
+    opinion: (document.getElementById('ev-opinion') || {}).value ? document.getElementById('ev-opinion').value.trim() : '',
+    answers: Object.assign({}, evalState.answers)
+  };
+
+  _mem.evalList = _mem.evalList || [];
+  _mem.evalList.push(record);
+  idbPutAll('evalList', _mem.evalList);
+
+  toast('✅ 평가가 제출되었습니다. 감사합니다!');
+
+  document.getElementById('ev-name').value = '';
+  if (document.getElementById('ev-bp')) document.getElementById('ev-bp').value = '';
+  if (document.getElementById('ev-bp-date')) document.getElementById('ev-bp-date').value = '';
+  if (document.getElementById('ev-height')) document.getElementById('ev-height').value = '';
+  if (document.getElementById('ev-weight')) document.getElementById('ev-weight').value = '';
+  document.getElementById('ev-opinion').value = '';
+  document.querySelectorAll('#satisfaction-sections input[type=radio]').forEach(function(r) { r.checked = false; });
+  document.querySelectorAll('.yn-btn').forEach(function(b) { b.classList.remove('selected-yes', 'selected-no'); });
+  initEval();
+}
 
 /* -----------------------------------
    ADMIN
